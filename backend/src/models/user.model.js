@@ -1,4 +1,5 @@
 import mongoose from "mongoose";
+import bcrypt from "bcryptjs";
 
 const userSchema = new mongoose.Schema(
   {
@@ -11,6 +12,9 @@ const userSchema = new mongoose.Schema(
       type: String,
       required: true,
       unique: true,
+      minlength: 4,
+      lowercase: true,
+      trim: true,
     },
     password: {
       type: String,
@@ -22,24 +26,24 @@ const userSchema = new mongoose.Schema(
       default: "",
     },
     contactUsers: [
-    {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: "User", // reference to the same User model
-    },
-  ],
+      {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "User",
+      },
+    ],
   },
   { timestamps: true }
 );
 
 userSchema.pre("save", async function (next) {
-    if (!this.isModified("password")) return next();
+  if (!this.isModified("password")) return next();
 
-    this.password= await bcrypt.hash(this.password, 10)
-    next();
+  this.password = await bcrypt.hash(this.password, 10)
+  next();
 })
 
 userSchema.methods.isPasswordCorrect = async function (password) {
-    return await bcrypt.compare(password, this.password)
+  return await bcrypt.compare(password, this.password)
 }
 
 const User = mongoose.model("User", userSchema);

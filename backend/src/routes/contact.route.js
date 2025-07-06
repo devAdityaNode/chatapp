@@ -5,7 +5,7 @@ import { searchUsers, getContactUsers, deleteContactUser} from "../controllers/c
 const router = express.Router();
 
 router.get("/users", protectRoute, getContactUsers);
-router.delete("/:id", protectRoute, deleteContactUser);
+router.delete("/delete-contact/:id", protectRoute, deleteContactUser);
 router.get("/search", protectRoute, searchUsers);
 
 export default router;

@@ -25,6 +25,10 @@ export const signup = async (req, res) => {
       return res.status(400).json({ message: "All fields are required" });
     }
 
+    if (userName.length < 4) {
+      return res.status(400).json({ message: "User Name must be at least 4 characters" });
+    }
+
     if (password.length < 6) {
       return res.status(400).json({ message: "Password must be at least 6 characters" });
     }
@@ -35,13 +39,10 @@ export const signup = async (req, res) => {
 
     if (user) return res.status(400).json({ message: "Username or Email already exists" });
 
-    const salt = await bcrypt.genSalt(10);
-    const hashedPassword = await bcrypt.hash(password, salt);
-
     const newUser = new User({
       userName,
       email,
-      password: hashedPassword,
+      password,
     });
 
     if (newUser) {
