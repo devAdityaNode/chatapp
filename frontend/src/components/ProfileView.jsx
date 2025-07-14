@@ -14,7 +14,7 @@ const ProfileView = ({ onBack, user }) => {
 
     reader.onload = async () => {
       const base64Image = reader.result;
-    //   setSelectedImg(base64Image);
+      
       await updateProfile({ profilePic: base64Image });
     };
   };

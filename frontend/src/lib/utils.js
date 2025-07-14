@@ -17,3 +17,21 @@ export const formatChatDate = (date) => {
   return dayjs(date).format("DD MMM YYYY");
 };
 
+export function formatTime(date) {
+  const inputDate = dayjs(date);
+  const now = dayjs();
+
+  if (inputDate.isSame(now, "day")) {
+    return inputDate.format("HH:mm");
+  }
+
+  if (inputDate.isSame(now.subtract(1, "day"), "day")) {
+    return "Yesterday";
+  }
+
+  if (inputDate.isSame(now, "year")) {
+    return inputDate.format("DD MMM");
+  }
+
+  return inputDate.format("DD MMM YYYY");
+}

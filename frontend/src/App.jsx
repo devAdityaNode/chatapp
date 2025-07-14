@@ -1,5 +1,4 @@
 import Navbar from "./components/Navbar";
-import ProfilePage from "./pages/ProfilePage";
 import HomePage from "./pages/HomePage";
 import SignUpPage from "./pages/SignUpPage";
 import LoginPage from "./pages/LoginPage";
@@ -34,8 +33,6 @@ useEffect(() => {
            <Route path="/" element={<HomePage />} />
            <Route path="/signup" element={!authUser ? <SignUpPage /> : <Navigate to="/" />} />
            <Route path="/login" element={!authUser ? <LoginPage /> : <Navigate to="/" />} />
-        {/* <Route path="/settings" element={<SettingsPage />} /> */}
-        <Route path="/profile" element={authUser ? <ProfilePage /> : <Navigate to="/login" />} />
       </Routes>
 
       <Toaster />

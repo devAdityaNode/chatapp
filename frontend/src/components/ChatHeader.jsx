@@ -26,19 +26,6 @@ const ChatHeader = () => {
     setShowMenu(false);
   };
 
-
-  // const handleClearChat = () => {
-  //   clearChat(selectedUser._id);
-  //   setShowMenu(false);
-  // };
-
-  // const handleDeleteContact = () => {
-  //   deleteContact(selectedUser._id);
-  //   setSelectedUser(null);
-  //   setShowMenu(false);
-  // };
-
-
   useEffect(() => {
     const handleClickOutside = (e) => {
       if (menuRef.current && !menuRef.current.contains(e.target)) {

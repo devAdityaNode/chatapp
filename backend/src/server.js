@@ -12,8 +12,7 @@ import connectDB from "./config/db.js";
 import authRoutes from "./routes/auth.route.js";
 import messageRoutes from "./routes/message.route.js";
 import contactRoutes from "./routes/contact.route.js";
-
-const app = express();
+import { app, server } from "./lib/socket.js";
 
 const __dirname = path.resolve();
 
@@ -42,12 +41,7 @@ app.use((err, req, res, next) => {
 });
 
 
-connectDB()
-    .then(() => {
-        app.listen(process.env.PORT || 5000, () => {
-            console.log(`⚙️ Server is running at port : ${process.env.PORT}`);
-        })
-    })
-    .catch((err) => {
-        console.log(err);
-    })
+server.listen(process.env.PORT, () => {
+  console.log("server is running on PORT:" + process.env.PORT);
+  connectDB();
+});

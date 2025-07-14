@@ -11,11 +11,9 @@ const AuthImagePattern = ({ title, subtitle }) => {
           </div>
         </div>
 
-        {/* Title & Subtitle */}
         <h2 className="text-3xl font-bold text-base-100">{title}</h2>
         <p className="text-base-content/70 text-base">{subtitle}</p>
 
-        {/* Glowing Blocks */}
         <div className="flex justify-center gap-3 pt-4">
           {[...Array(3)].map((_, i) => (
             <div

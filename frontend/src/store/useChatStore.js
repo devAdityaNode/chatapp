@@ -125,13 +125,42 @@ export const useChatStore = create((set, get) => ({
     }
   },
 
-  deleteContact: async (contactUserId) => {
-    try {
-      await axiosInstance.delete(`/contacts/delete-contact/${contactUserId}`);
-      set({ selectedUser: null });
-      get().clearConfirm();
-    } catch (err) {
-      toast.error("Delete contact failed");
-    }
+  subscribeToMessages: () => {
+    const { selectedUser } = get();
+    if (!selectedUser) return;
+
+    const socket = useAuthStore.getState().socket;
+
+    socket.on("newMessage", (newMessage) => {
+      const isMessageSentFromSelectedUser = newMessage.senderId === selectedUser._id;
+      if (!isMessageSentFromSelectedUser) return;
+
+      set({
+        messages: [...get().messages, newMessage],
+      });
+    });
+
+    socket.on("messagesDelivered", ({ messageIds }) => {
+      set((state) => ({
+        messages: state.messages.map((msg) =>
+          messageIds.includes(msg._id) ? { ...msg, isDelivered: true } : msg
+        ),
+      }));
+    });
+
+    socket.on("messagesSeen", ({ senderId }) => {
+      set((state) => ({
+        messages: state.messages.map((msg) =>
+          msg.receiverId === senderId ? { ...msg, isSeen: true } : msg
+        ),
+      }));
+    });
+
+
+  },
+
+  unsubscribeFromMessages: () => {
+    const socket = useAuthStore.getState().socket;
+    socket.off("newMessage");
   },
 }));

@@ -1,6 +1,6 @@
 import { useChatStore } from "../store/useChatStore";
 import { useEffect, useRef } from "react";
-import { MessageSquareMore, CheckCheck } from "lucide-react";
+import { MessageSquareMore, CheckCheck, Check } from "lucide-react";
 import dayjs from "dayjs";
 import ChatHeader from "./ChatHeader";
 import MessageInput from "./MessageInput";
@@ -15,18 +15,36 @@ const ChatContainer = () => {
     isMessagesLoading,
     selectedUser,
     isSelecting,
+    subscribeToMessages,
+    unsubscribeFromMessages,
     selectedMessageIds,
     toggleSelectedMessage,
   } = useChatStore();
 
-  const { authUser } = useAuthStore();
+  const { authUser, socket } = useAuthStore();
   const messageEndRef = useRef(null);
 
+  const filteredMessages = messages.filter(
+    (msg) => !msg.deletedBy?.includes(authUser._id)
+  );
+
+
   useEffect(() => {
-    if (selectedUser?._id) {
-      getMessages(selectedUser._id);
-    }
-  }, [selectedUser?._id]);
+    if (!selectedUser?._id) return;
+
+    socket.emit("joinChat", { withUserId: selectedUser._id });
+
+    getMessages(selectedUser._id);
+
+    socket.emit("messageSeen", { senderId: selectedUser._id });
+
+    subscribeToMessages();
+
+    return () => {
+      socket.emit("leaveChat");
+      unsubscribeFromMessages();
+    };
+  }, [selectedUser?._id, getMessages, subscribeToMessages, unsubscribeFromMessages]);
 
   useEffect(() => {
     if (messageEndRef.current && messages) {
@@ -34,12 +52,20 @@ const ChatContainer = () => {
     }
   }, [messages]);
 
-  const groupedMessages = messages.reduce((groups, msg) => {
+  // const groupedMessages = messages.reduce((groups, msg) => {
+  //   const date = dayjs(msg.createdAt).format("YYYY-MM-DD");
+  //   if (!groups[date]) groups[date] = [];
+  //   groups[date].push(msg);
+  //   return groups;
+  // }, {});
+
+  const groupedMessages = filteredMessages.reduce((groups, msg) => {
     const date = dayjs(msg.createdAt).format("YYYY-MM-DD");
     if (!groups[date]) groups[date] = [];
     groups[date].push(msg);
     return groups;
   }, {});
+
 
   if (isMessagesLoading) {
     return (
@@ -90,39 +116,89 @@ const ChatContainer = () => {
                         />
                       </div>
                     </div>
-                    <div className="chat-bubble flex items-end justify-between">
-                      <div>
-                        {message.isDeleted ? (
-                          <span className="italic text-sm text-muted-foreground">
-                            This message was deleted
-                          </span>
-                        ) : (
-                          <>
-                            {message.image && (
+                    <div className="chat-bubble p-2 flex flex-col gap-1 sm:max-w-[300px]">
+                      {message.isDeleted ? (
+                        <>
+                          <div className="flex items-center justify-between gap-2">
+                            <span className="italic text-sm text-muted-foreground">
+                              This message was deleted
+                            </span>
+                            <span className="text-[10px] text-muted-foreground">
+                              {formatMessageTime(message.createdAt)}
+                            </span>
+                          </div>
+
+                        </>
+                      ) : (
+                        <>
+                          {message.image && (
+                            <div className="relative">
                               <img
                                 src={message.image}
                                 alt="Attachment"
-                                className="sm:max-w-[200px] rounded-md mb-1"
+                                className="rounded-md"
                               />
-                            )}
-                            {message.text && (
-                              <span>{message.text}</span>
-                            )}
-                          </>
-                        )}
-                      </div>
+                              {!message.text && (
+                                <div className="absolute bottom-1 right-1 flex items-center space-x-1 bg-black/50 rounded px-1">
+                                  <span className="text-[10px] text-white">
+                                    {formatMessageTime(message.createdAt)}
+                                  </span>
+                                  {isSender && (
+                                    <>
+                                      {!message.isDelivered ? (
+                                        <Check className="w-4 h-4 text-gray-300" />
+                                      ) : message.isSeen ? (
+                                        <CheckCheck className="w-4 h-4 text-blue-400" />
+                                      ) : (
+                                        <CheckCheck className="w-4 h-4 text-gray-300" />
+                                      )}
+                                    </>
+                                  )}
+                                </div>
+                              )}
+                            </div>
+                          )}
 
-                      <div className="flex items-center space-x-1 ml-2">
-                        <span className="text-[10px] opacity-70">
-                          {formatMessageTime(message.createdAt)}
-                        </span>
-                        {isSender && !message.isDeleted && (
-                          <CheckCheck
-                            className="w-3 h-3"
-                            style={{ color: message.isSeen ? "#53bdeb" : "gray" }}
-                          />
-                        )}
-                      </div>
+                          {message.text && (
+                            <div className="flex items-center justify-between gap-2">
+                              <span>{message.text}</span>
+                              {!message.image && (
+                                <div className="flex items-center gap-1 text-[10px] opacity-70">
+                                  <span>{formatMessageTime(message.createdAt)}</span>
+                                  {isSender && (
+                                    <>
+                                      {!message.isDelivered ? (
+                                        <Check className="w-4 h-4 text-gray-400" />
+                                      ) : message.isSeen ? (
+                                        <CheckCheck className="w-4 h-4 text-blue-400" />
+                                      ) : (
+                                        <CheckCheck className="w-4 h-4 text-gray-400" />
+                                      )}
+                                    </>
+                                  )}
+                                </div>
+                              )}
+                            </div>
+                          )}
+
+                          {(message.image && message.text) && (
+                            <div className="flex items-center justify-end gap-1 text-[10px] text-muted-foreground mt-1">
+                              <span>{formatMessageTime(message.createdAt)}</span>
+                              {isSender && (
+                                <>
+                                  {!message.isDelivered ? (
+                                    <Check className="w-4 h-4 text-gray-400" />
+                                  ) : message.isSeen ? (
+                                    <CheckCheck className="w-4 h-4 text-blue-400" />
+                                  ) : (
+                                    <CheckCheck className="w-4 h-4 text-gray-400" />
+                                  )}
+                                </>
+                              )}
+                            </div>
+                          )}
+                        </>
+                      )}
                     </div>
 
 

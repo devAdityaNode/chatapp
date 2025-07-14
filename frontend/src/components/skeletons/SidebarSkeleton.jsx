@@ -3,13 +3,11 @@ const SidebarSkeleton = () => {
 
   return (
     <aside className="w-[350px] border-r border-gray-800 bg-[#1e1e1e] flex flex-col">
-      {/* Header search bar skeleton */}
       <div className="p-4 flex items-center gap-3 border-b border-gray-800">
         <div className="skeleton w-5 h-5 rounded" />
         <div className="skeleton h-8 w-full rounded-full" />
       </div>
 
-      {/* Contacts list skeleton */}
       <div className="flex-1 overflow-y-auto">
         {skeletonContacts.map((_, idx) => (
           <div

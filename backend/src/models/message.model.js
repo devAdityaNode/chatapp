@@ -19,22 +19,26 @@ const messageSchema = new mongoose.Schema(
       type: String,
     },
     isDeleted: {
-      type: Boolean, 
+      type: Boolean,
       default: false,
     },
     deletedBy: [{
-       type: mongoose.Schema.Types.ObjectId, 
-       ref: "User",
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "User",
     }],
+    isDelivered: {
+      type: Boolean,
+      default: false,
+    },
     isSeen: {
-       type: Boolean, 
-       default: false,
+      type: Boolean,
+      default: false,
     },
   },
   { timestamps: true }
 );
 
-messageSchema.statics.deleteMessagesForUser = async function(userId, otherUserId) {
+messageSchema.statics.deleteMessagesForUser = async function (userId, otherUserId) {
   await this.updateMany(
     {
       $or: [
