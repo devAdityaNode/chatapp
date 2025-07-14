@@ -11,6 +11,9 @@
   "author": "",
   "license": "ISC",
   "description": "",
+  "engines": {
+  "node": "20.x"
+},
   "devDependencies": {
     "concurrently": "^9.2.0"
   }
