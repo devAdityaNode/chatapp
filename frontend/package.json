@@ -12,6 +12,7 @@
   "dependencies": {
     "@tailwindcss/vite": "^4.1.10",
     "axios": "^1.10.0",
+    "chatting-app": "file:..",
     "daisyui": "^5.0.43",
     "dayjs": "^1.11.13",
     "framer-motion": "^12.19.1",
