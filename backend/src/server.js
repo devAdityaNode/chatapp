@@ -41,7 +41,7 @@ app.use((err, req, res, next) => {
 });
 
 
-server.listen(process.env.PORT, () => {
+server.listen(process.env.PORT || 5000, () => {
   console.log("server is running on PORT:" + process.env.PORT);
   connectDB();
 });
